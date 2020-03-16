@@ -10,7 +10,7 @@ from urllib.parse import urlencode
 from http.client import HTTPSConnection
 #
 #
-class Request(object):
+class Request:
     def __init__(self, tbot):
         resp = tbot.getresponse()
         self.status = (resp.status, resp.reason)
@@ -59,6 +59,10 @@ class Request(object):
     #
     @property
     def data_size(self): return self.__len__()
+    #
+    @classmethod
+    def get_update_id(self, message):
+        return message['update_id']
     #
     @classmethod
     def get_message_id(self, message):
@@ -123,7 +127,7 @@ class Request(object):
             if item['type'] == 'bot_command': return True
 #
 #
-class Message(object):
+class Message:
     '''Telegram message printing...\n
 dt_format (Default: %H:%M:%S %m-%d-%Y)
 msg_format (Values:\n\tchat_id\n\tmessage_id
@@ -177,7 +181,7 @@ dt_format=None (Use default), msg_format=None (Use default)'''
         except KeyError: return
 #
 #
-class Telegram(object):
+class Telegram:
     def __init__(self, token):
         url = 'https://api.telegram.org/bot'
         self.__url = urlparse('{}{}/'.format(url, token))
@@ -221,4 +225,22 @@ class Telegram(object):
     def __del__(self): self.__web.close()
     #
     def __exit__(self, *exec_info): self.__del__()
+#
+#
+class BotWorker:
+    def __init__(self, token):
+        self.__api = Telegram(token)
+        self.__cmd = {}
+    #
+    def start(self): pass
+    #
+    def __setitem__(self, cmd, handler): self.__cmd[cmd] = handler
+    #
+    def __getitem__(self, cmd): return self.__cmd[cmd]
+    #
+    def __delitem__(self, cmd): del self.__cmd[cmd]
+    #
+    def __enter__(self): return self
+    #
+    def __exit__(self, *exec_info): pass
 
